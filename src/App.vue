@@ -1,22 +1,35 @@
 <script setup lang="ts">
-import layout from '@/Layout/index.vue'
-import { routes } from "@/router";
-import {provide} from "vue";
+import { computed } from 'vue'
+import { RouterView, useRouter, type RouteRecordRaw } from 'vue-router'
+import { LayoutBasic, LayoutSidebar, type SidebarItem } from '@/components/layout'
+import { Toaster } from '@/components/ui/sonner'
 
-const menus = routes.map(r => ({
-  path: r.path,
-  title: r.meta?.title,
-  name: r.name
-}))
+import { routes } from './router'
 
-provide("menus", menus);
+const router = useRouter()
+const activeId = computed(() => router.currentRoute.value.name)
+
+const createSidebarItem = (rs: RouteRecordRaw[]): SidebarItem[] =>
+  rs.map((r) => {
+    const item = Object.create({
+      id: r.name,
+      label: r.meta?.title ?? '',
+      path: r.path,
+      children: r.children ? createSidebarItem(r.children) : undefined,
+    }) as SidebarItem
+
+    return item
+  })
+
+const sidebarItems = createSidebarItem(routes)
 </script>
 
 <template>
-  <layout>
-    <router-view></router-view>
-  </layout>
+  <LayoutBasic>
+    <template #header>
+      <LayoutSidebar :items="sidebarItems" :active-id="activeId" />
+    </template>
+    <RouterView />
+  </LayoutBasic>
+  <Toaster />
 </template>
-
-<style scoped lang="scss">
-</style>
