@@ -9,6 +9,7 @@ export const routes = [
     name: 'home',
     meta: {
       title: '首页',
+      scroll: true
     },
     component: HomeView,
   },

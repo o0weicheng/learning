@@ -24,6 +24,22 @@ export const webapiRoutes = [
         },
         component: () => import('@/views/webapi/CSSCustomHighlight.vue'),
       },
+      {
+        path: 'clipboard-api',
+        name: 'clipboardApi',
+        meta: {
+          title: '剪切板',
+        },
+        component: () => import('@/views/webapi/WebClipboard.vue'),
+      },
+      {
+        path: 'drag-drop',
+        name: 'DragAndDrop',
+        meta: {
+          title: '拖放',
+        },
+        component: () => import('@/views/webapi/DragAndDrop.vue'),
+      },
     ],
   },
 ] satisfies RouteRecordRaw[]

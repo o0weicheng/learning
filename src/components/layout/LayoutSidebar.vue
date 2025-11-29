@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RouteRecordNameGeneric } from 'vue-router'
 import type { SidebarItem } from '.'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 
 defineProps<{
   items: SidebarItem[]
