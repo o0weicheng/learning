@@ -40,6 +40,14 @@ export const webapiRoutes = [
         },
         component: () => import('@/views/webapi/DragAndDrop.vue'),
       },
+      {
+        path: 'animation',
+        name: 'Animation',
+        meta: {
+          title: '动画',
+        },
+        component: () => import('@/views/webapi/AnimationApi.vue'),
+      },
     ],
   },
 ] satisfies RouteRecordRaw[]
