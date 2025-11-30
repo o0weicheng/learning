@@ -33,7 +33,7 @@ export const webapiRoutes = [
         component: () => import('@/views/webapi/WebClipboard.vue'),
       },
       {
-        path: 'drag-drop',
+        path: 'Drag-Drop',
         name: 'DragAndDrop',
         meta: {
           title: '拖放',
