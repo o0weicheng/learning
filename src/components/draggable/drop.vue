@@ -9,7 +9,7 @@ defineOptions({
 
 const emit = defineEmits<{
   (e: 'dragover', ev: DragEvent): void,
-  (e: 'drop', ev: unknown): void,
+  (e: 'drop', ev: any): void,
 }>()
 
 const attrs = useAttrs()

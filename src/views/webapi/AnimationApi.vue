@@ -2,12 +2,24 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { CirclePauseIcon, CirclePlayIcon, RefreshCcwDotIcon } from 'lucide-vue-next'
-import { type Directive, type DirectiveBinding, onUnmounted, reactive, ref, toRaw } from 'vue'
+import { CirclePauseIcon, CirclePlayIcon, RefreshCcwDotIcon, Trash2Icon } from 'lucide-vue-next'
+import {
+  computed,
+  type Directive,
+  type DirectiveBinding,
+  onUnmounted,
+  ref,
+  toRaw,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import { Separator } from '@/components/ui/separator'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Drag, Drop } from '@/components/draggable'
 import { Slider } from '@/components/ui/slider'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Toggle } from '@/components/ui/toggle'
+import { Input } from '@/components/ui/input'
 
 type AnimateKeyAndOptions = [Keyframe[] | PropertyIndexedKeyframes, KeyframeAnimationOptions]
 type AnimationType = 'translate' | 'rotate' | 'scale'
@@ -15,14 +27,15 @@ type AnimationType = 'translate' | 'rotate' | 'scale'
 interface CustomAnimationItem {
   type: AnimationType
   key: CustomAnimationItem['type']
+  id: string,
   label: string
   color: string
-  offset: number
-  value: number
+  offset: number[]
+  value: number[]
 }
 
 const customAnimationOptions = ref<CustomAnimationItem[]>([])
-const customAnimationItems: Omit<CustomAnimationItem, 'offset' | 'value'>[] = [
+const customAnimationItems: Omit<CustomAnimationItem, 'offset' | 'value' | 'id'>[] = [
   {
     type: 'translate',
     key: 'translate',
@@ -42,11 +55,6 @@ const customAnimationItems: Omit<CustomAnimationItem, 'offset' | 'value'>[] = [
     label: '缩放',
   },
 ]
-const customAnimationConfig = reactive({
-  value: 0,
-  label: '',
-  offset: 0,
-})
 
 const items = ref<AnimateKeyAndOptions[]>([
   [
@@ -75,8 +83,67 @@ const items = ref<AnimateKeyAndOptions[]>([
   ],
 ])
 const pauseItems = ref<number[]>([])
-
 const animationMap: Map<number, Animation> = new Map()
+
+const customerAnimationRef = useTemplateRef('customerAnimationRef')
+const customerAnimationPlay = ref<boolean>(false)
+const customerAnimationTiming = ref<number>(2)
+const animationContent = computed(() => {
+  const keyframes: Keyframe[] | PropertyIndexedKeyframes = [
+    {
+      transform: 'translateX(0%) rotate(0deg) scale(1)',
+    },
+  ]
+  customAnimationOptions.value.forEach((item) => {
+    const _animation = {
+      transform: '',
+    }
+    switch (item.type) {
+      case 'translate':
+        _animation.transform += `translateX(${item.value}%)`
+        break
+      case 'rotate':
+        _animation.transform += `rotate(${item.value}deg)`
+        break
+      case 'scale': {
+        let scale = item?.value[0] || 0
+        if (scale === 0) {
+          scale = 1
+        } else if (scale > 0) {
+          scale = 1 + scale * 0.01
+        } else {
+          scale = 1 - Math.abs(scale) * 0.01
+        }
+        _animation.transform += `scale(${scale})`
+        break
+      }
+    }
+
+    if (item.offset[0]) {
+      Object.assign(_animation, { offset: (toRaw(item.offset)[0] as number) * 0.01 })
+    }
+    keyframes.push(_animation)
+  })
+  return keyframes
+})
+
+let customerAnimation: Animation | null = null
+watch(
+  () => customerAnimationPlay.value,
+  () => {
+    if (!customerAnimationRef.value) return
+    if (customerAnimationPlay.value) {
+      console.log(animationContent.value)
+      customerAnimation = customerAnimationRef.value.animate(animationContent.value, {
+        duration: customerAnimationTiming.value * 1000,
+        iterations: Infinity,
+      })
+      return
+    }
+    customerAnimation && customerAnimation.cancel()
+  },
+)
+const handleAnimationTimingChange = () => (customerAnimationPlay.value = false)
 
 const vAnimation: Directive = {
   mounted: (el: HTMLElement, binding: DirectiveBinding) => {
@@ -84,7 +151,6 @@ const vAnimation: Directive = {
       const {
         value: { item, index },
       }: { value: { item: AnimateKeyAndOptions; index: number } } = binding
-      console.dir(toRaw(item))
       const _animate = el.animate(...toRaw(item))
       animationMap.set(index, _animate)
     } catch (e) {
@@ -114,19 +180,19 @@ const onSetAnimationStatus = (status: 'play' | 'pause' | 'reverse', value: numbe
 }
 
 const handle_drop = (data: CustomAnimationItem) => {
-  const _options = toRaw(customAnimationOptions.value) as CustomAnimationItem[]
-  _options.push(<CustomAnimationItem>data)
-
-  customAnimationOptions.value = _options.map((o, index) => {
-    return {
-      ...o,
-      offset: (1 / _options.length) * index,
-      value: o.value ?? 0,
-    }
+  customerAnimationPlay.value = false
+  customAnimationOptions.value.push({
+    ...data,
+    id: crypto.randomUUID(),
+    offset: [0],
+    value: [0],
   })
 }
 
-const handle_dragover = () => {}
+const handleRemoveAnimationItem = (item: CustomAnimationItem) => {
+  customerAnimationPlay.value = false
+  customAnimationOptions.value = customAnimationOptions.value.filter((i) => i.id !== item.id)
+}
 
 onUnmounted(() => {
   Array.from(animationMap).forEach(([, an]) => an.cancel())
@@ -167,8 +233,9 @@ onUnmounted(() => {
       <CardContent>
         <Alert>
           <AlertTitle>拖动标签到下面方框配置动画</AlertTitle>
-          <AlertDescription>然后点击标签配置动画时间和值。</AlertDescription>
-          <AlertDescription>后面动画的时间不能小于前面动画的时间，最小值 0，最大值 1。</AlertDescription>
+          <AlertDescription>· 然后点击标签配置动画时间和值。</AlertDescription>
+          <AlertDescription>· 动画时间不设置的时候，均分剩下的时间。</AlertDescription>
+          <AlertDescription>· 配置好点击下面的按钮开启动画，每次配置自动暂停。</AlertDescription>
         </Alert>
         <div class="mt-4 grid grid-cols-3 gap-2 cursor-default">
           <Drag
@@ -184,47 +251,63 @@ onUnmounted(() => {
         <Drop
           class="mt-2 border border-gray-300 p-3 rounded-lg min-h-[40px] grid grid-cols-5 gap-2"
           @drop="handle_drop"
-          @dragover="handle_dragover"
         >
-          <span v-show="!customAnimationOptions.length" class="text-gray-400 text-sm">拖到这里 👋</span>
-          <div
-            v-for="item of customAnimationOptions"
-            :key="item.key"
-            :style="{ backgroundColor: item.color }"
-            class="rounded p-px text-white min-w-[100px] text-center cursor-pointer"
+          <span v-show="!customAnimationOptions.length" class="text-gray-400 text-sm"
+            >拖到这里 👋</span
           >
-            {{ item.label }}
-          </div>
+          <template v-for="item of customAnimationOptions" :key="item.key">
+            <Popover>
+              <PopoverTrigger as-child>
+                <div
+                  :style="{ backgroundColor: item.color }"
+                  class="rounded p-px text-white min-w-[100px] text-center cursor-pointer"
+                >
+                  {{ item.label }}
+                </div>
+              </PopoverTrigger>
+              <PopoverContent>
+                <span>动画时间(%): </span><span>{{ item.offset }}</span>
+                <Slider
+                  class="my-2"
+                  v-model="item.offset"
+                  :default-value="[0]"
+                  :max="100"
+                  :step="1"
+                ></Slider>
+                <span>{{ item.label }}(%): </span><span>{{ item.value }}</span>
+                <Slider
+                  class="my-2"
+                  v-model="item.value"
+                  :default-value="[0]"
+                  :max="100"
+                  :min="item.key === 'scale' ? -100 : 0"
+                  :step="1"
+                ></Slider>
+                <div class="flex">
+                  <Button class="ml-auto" size="sm" variant="destructive" @click="handleRemoveAnimationItem(item)">
+                    <Trash2Icon />
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </template>
         </Drop>
-        <template v-if="customAnimationOptions.length">
-          <div class="border border-gray-300 p-3 rounded min-h-[40px]">
-            <div class="mr-2">{{ customAnimationConfig.label }}</div>
-            <div class="grid grid-flow-row-dense grid-cols-8 gap-6">
-              <div>value</div>
-              <div>{{ customAnimationConfig.value }}</div>
-              <div class="col-span-6">
-                <Slider
-                  :default-value="[customAnimationConfig.value]"
-                  :max="100"
-                  :step="1"
-                  class="w-[100%]"
-                />
-              </div>
-              <div>offset</div>
-              <div>{{ customAnimationConfig.offset }}</div>
-              <div class="col-span-6">
-                <Slider
-                  :default-value="[customAnimationConfig.offset]"
-                  :max="100"
-                  :step="1"
-                  class="w-[100%]"
-                />
-              </div>
-            </div>
+        <div class="mt-4 flex">
+          <Toggle variant="outline" aria-label="Toggle play" v-model="customerAnimationPlay">
+            <CirclePlayIcon class="h-4 w-4" />
+          </Toggle>
+          <div class="flex flex-1 pl-2 items-center">
+            <label class="text-xs text-nowrap px-2" for="">动画总时间(秒)</label>
+            <Input
+              class="w-auto"
+              type="number"
+              v-model="customerAnimationTiming"
+              @change="handleAnimationTimingChange"
+            />
           </div>
-        </template>
-        <div class="mt-4">
-          <div class="size-15 rounded-xl bg-red-400"></div>
+        </div>
+        <div class="mt-2">
+          <div ref="customerAnimationRef" class="size-15 rounded-xl bg-red-400"></div>
         </div>
       </CardContent>
     </Card>
