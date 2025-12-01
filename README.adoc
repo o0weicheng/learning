@@ -1,0 +1,14 @@
+= learning
+
+一个小学习项目 `vue3` `vite` `typescript`
+
+边学习 `vue` 进阶技巧边学习原生 `js` 知识
+
+== 目前完成 👇
+
+- Worker 基本通信
+- CSS 自定义高亮
+- 剪切板
+- 拖放 (draggable 版本)
+- Animation Api
+    - 拖放配置动画效果
