@@ -100,10 +100,10 @@ const animationContent = computed(() => {
     }
     switch (item.type) {
       case 'translate':
-        _animation.transform += `translateX(${item.value}%)`
+        _animation.transform += `translateX(${item.value}%) rotate(${0}deg) scale(1)`
         break
       case 'rotate':
-        _animation.transform += `rotate(${item.value}deg)`
+        _animation.transform += `translateX(${0}%) rotate(${item.value}deg) scale(1)`
         break
       case 'scale': {
         let scale = item?.value[0] || 0
@@ -114,7 +114,7 @@ const animationContent = computed(() => {
         } else {
           scale = 1 - Math.abs(scale) * 0.01
         }
-        _animation.transform += `scale(${scale})`
+        _animation.transform += `translateX(${0}%) scale(${scale}) rotate(${0}deg)`
         break
       }
     }
@@ -133,7 +133,6 @@ watch(
   () => {
     if (!customerAnimationRef.value) return
     if (customerAnimationPlay.value) {
-      console.log(animationContent.value)
       customerAnimation = customerAnimationRef.value.animate(animationContent.value, {
         duration: customerAnimationTiming.value * 1000,
         iterations: Infinity,
@@ -279,7 +278,7 @@ onUnmounted(() => {
                   class="my-2"
                   v-model="item.value"
                   :default-value="[0]"
-                  :max="100"
+                  :max="item.key === 'rotate' ? 360 : 100"
                   :min="item.key === 'scale' ? -100 : 0"
                   :step="1"
                 ></Slider>

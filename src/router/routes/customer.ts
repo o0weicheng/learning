@@ -16,6 +16,14 @@ export const customerRoutes = [
         },
         component: () => import('@/views/customer/CustomerInterval.vue'),
       },
+      {
+        path: 'debound-throtf',
+        name: 'DeboundThrotf',
+        meta: {
+          title: '防抖截流',
+        },
+        component: () => import('@/views/customer/DeboundThrotf.vue'),
+      },
     ],
   },
 ] satisfies RouteRecordRaw[]
