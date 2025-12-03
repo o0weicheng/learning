@@ -12,7 +12,7 @@ export const customerRoutes = [
         path: 'interval',
         name: 'interval',
         meta: {
-          title: '时间间隔',
+          title: '自定义计时器',
         },
         component: () => import('@/views/customer/CustomerInterval.vue'),
       },
