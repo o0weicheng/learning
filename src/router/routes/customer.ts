@@ -24,6 +24,14 @@ export const customerRoutes = [
         },
         component: () => import('@/views/customer/DeboundThrotf.vue'),
       },
+      {
+        path: 'onion-model',
+        name: 'OnionModel',
+        meta: {
+          title: '洋葱模型',
+        },
+        component: () => import('@/views/customer/OnionModel.vue'),
+      },
     ],
   },
 ] satisfies RouteRecordRaw[]

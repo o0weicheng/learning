@@ -1,4 +1,6 @@
-export interface TimerInterval {
+export type TimerIntervalCall = 'pause' | 'abort' | 'resume'
+
+export type TimerInterval = {
   pause: () => void
   abort: () => void
   resume: () => void
