@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { customerRoutes } from './routes/customer'
 import { webapiRoutes } from './routes/webapi'
+import { virtualRoutes } from './routes/vritual'
 
 export const routes = [
   {
@@ -9,7 +10,7 @@ export const routes = [
     name: 'home',
     meta: {
       title: '首页',
-      scroll: true
+      scroll: true,
     },
     component: HomeView,
   },
@@ -26,6 +27,7 @@ export const routes = [
   },
   ...customerRoutes,
   ...webapiRoutes,
+  ...virtualRoutes,
 ] satisfies RouteRecordRaw[]
 
 const router = createRouter({
