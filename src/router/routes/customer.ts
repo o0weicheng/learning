@@ -25,12 +25,12 @@ export const customerRoutes = [
         component: () => import('@/views/customer/DeboundThrotf.vue'),
       },
       {
-        path: 'onion-model',
-        name: 'OnionModel',
+        path: 'script-model',
+        name: 'ScriptModel',
         meta: {
-          title: '洋葱模型',
+          title: '设计模式',
         },
-        component: () => import('@/views/customer/OnionModel.vue'),
+        component: () => import('@/views/customer/ScriptModel.vue'),
       },
     ],
   },

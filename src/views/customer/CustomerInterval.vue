@@ -35,7 +35,7 @@ const interval_1_run_default = () => {
   count = 0
   interval_1 = timer.interval(() => {
     time1.value.push(`执行定时任务${++count}...`)
-    scrollToBotton()
+    scrollToBottom()
   }, time1_duration.value)
 }
 interval_1_run_map.set('abort', interval_1_run_abort)
@@ -58,7 +58,7 @@ const on_interval_clean = () => {
   }
   time1.value = []
 }
-const scrollToBotton = async () => {
+const scrollToBottom = async () => {
   await nextTick()
   const componentInstance = scrollArea.value
   if (!componentInstance) return
