@@ -21,11 +21,11 @@ const onAddTask = () => {
   onionModel.add(async (next) => {
     runTasks.push(startStr)
     await new Promise((resolve) => setTimeout(() => {
-      runTasks.push('-------')
-      resolve()
+      resolve(null)
     }, 1000))
+    await next()
     runTasks.push(endStr)
-    next()
+
   })
 }
 

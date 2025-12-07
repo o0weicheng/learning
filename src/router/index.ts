@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import { customerRoutes } from './routes/customer'
 import { webapiRoutes } from './routes/webapi'
 import { virtualRoutes } from './routes/vritual'
+import { canvasRoutes } from './routes/canvas'
 
 export const routes = [
   {
@@ -28,6 +29,7 @@ export const routes = [
   ...customerRoutes,
   ...webapiRoutes,
   ...virtualRoutes,
+  ...canvasRoutes,
 ] satisfies RouteRecordRaw[]
 
 const router = createRouter({
