@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ArrowDownToLineIcon } from 'lucide-vue-next'
 
 const items = new Array(12)
+let rafId: number | null = null
 const itemSize = 65
 const gapSize = 32
 const colors = [
@@ -55,9 +56,11 @@ const io = new IntersectionObserver((entries) => {
       const rootHeight = entry.rootBounds?.height || window.innerHeight
 
       const progress = 1 - (rect.top / rootHeight)
-      requestAnimationFrame(() => {
+      rafId = requestAnimationFrame(() => {
         offset.value = Math.min(1, Math.max(0, progress))
       })
+    } else {
+      if (rafId) cancelAnimationFrame(rafId)
     }
   })
 }, obOptions)
@@ -67,26 +70,29 @@ onMounted(() => {
   io.observe(ioTarget.value)
 })
 
-onUnmounted(() => ioTarget.value && io.unobserve(ioTarget.value))
+onUnmounted(() => {
+  if (ioTarget.value) io.unobserve(ioTarget.value)
+  if (rafId) cancelAnimationFrame(rafId)
+})
 </script>
 
 <template>
   <section>
     <div class="min-h-[100vh]">
       <Alert>
-        <AlertTitle><ArrowDownToLineIcon /></AlertTitle>
+        <AlertTitle>
+          <ArrowDownToLineIcon />
+        </AlertTitle>
         <AlertDescription><span>内容在下面</span></AlertDescription>
       </Alert>
     </div>
     <div class="min-h-[200vh] bg-gray-400">
       <div class="flex h-[50vh] top-[25vh] sticky bg-red-400">
-        <div class="m-auto grid grid-cols-6 gap-8" :style="{'--offset': offset, '--un-offset': 1 - offset, '--item-size': itemSize + 'px'}">
-          <div
-            class="rounded-2xl size-(--item-size) bg-(--bg-color)"
-            :style="{ '--bg-color': colors[index], opacity: offset, transform: `translate(${-posX(index)*(1-offset)}px, ${-posY(index)*(1-offset)}px)`}"
-            v-for="(item, index) of items"
-            :key="item"
-          ></div>
+        <div class="m-auto grid grid-cols-6 gap-8"
+          :style="{ '--offset': offset, '--un-offset': 1 - offset, '--item-size': itemSize + 'px' }">
+          <div class="rounded-2xl size-(--item-size) bg-(--bg-color)"
+            :style="{ '--bg-color': colors[index], opacity: offset, transform: `translate(${-posX(index) * (1 - offset)}px, ${-posY(index) * (1 - offset)}px)` }"
+            v-for="(item, index) of items" :key="item"></div>
         </div>
       </div>
       <div ref="io-target" class="h-[125vh] mt-[20vh]"></div>

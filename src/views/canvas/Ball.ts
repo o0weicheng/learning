@@ -1,5 +1,5 @@
 import { Alert, AlertTitle } from '@/components/ui/alert'
-import { createVNode, defineComponent, nextTick, useTemplateRef } from 'vue'
+import { createVNode, defineComponent, nextTick, onUnmounted, useTemplateRef } from 'vue'
 import type { BallInfo } from './types'
 
 class Ball {
@@ -65,6 +65,7 @@ export default defineComponent({
   setup: () => {
     const canvasRef = useTemplateRef('canvas-ball-ref')
     let canvas: null | HTMLCanvasElement = null
+    let rafID: number | null = null
 
     const balls: Set<Ball> = new Set()
 
@@ -102,9 +103,13 @@ export default defineComponent({
           ball.update()
           ball.draw()
         })
-        requestAnimationFrame(run)
+        rafID = requestAnimationFrame(run)
       }
       run()
+    })
+
+    onUnmounted(() => {
+      if (rafID) cancelAnimationFrame(rafID)
     })
   },
   render: () =>

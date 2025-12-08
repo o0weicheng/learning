@@ -24,6 +24,22 @@ export const canvasRoutes = [
         },
         component: () => import('@/views/canvas/GravityBall.ts'),
       },
+      {
+        path: 'waves',
+        name: 'Waves',
+        meta: {
+          title: '波浪',
+        },
+        component: () => import('@/views/canvas/Waves.ts'),
+      },
+      {
+        path: 'making-chart',
+        name: 'CanvasChart',
+        meta: {
+          title: 'Charts',
+        },
+        component: () => import('@/views/canvas/CanvasChart.vue'),
+      },
     ],
   },
 ] satisfies RouteRecordRaw[]

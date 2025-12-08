@@ -8,16 +8,13 @@ const ball = (canvas: HTMLCanvasElement, detail: BallInfo) => {
   const ballInfo = detail
   const ctx = canvas.getContext('2d')
   let pointerId: number
-  const rafId: number | null = null
+  let rafId: number | null = null
   let isDiragging = false
 
-  let lastX = 0,
-    lastY = 0
-
   const animateConfig = {
-    gravity: 0.87, // 重力加速度
+    gravity: 0.98, // 重力加速度
     bounce: 0.7, // 弹性(剩余能量)
-    friction: 0.89, // 摩擦力
+    friction: 0.86, // 摩擦力
   }
 
   const pointermove = (ev: PointerEvent) => {
@@ -40,14 +37,12 @@ const ball = (canvas: HTMLCanvasElement, detail: BallInfo) => {
     }
   }
 
-  const pointerup = (ev: PointerEvent) => {
+  const pointerup = () => {
     isDiragging = false
     canvas.releasePointerCapture(pointerId)
     canvas.removeEventListener('pointermove', pointermove)
     canvas.removeEventListener('pointerup', pointerup)
 
-    ballInfo.vx = ballInfo.x - lastX
-    ballInfo.vy = ballInfo.y - lastY
     animate()
   }
 
@@ -61,22 +56,12 @@ const ball = (canvas: HTMLCanvasElement, detail: BallInfo) => {
     isDiragging = true
     if (rafId) cancelAnimationFrame(rafId)
 
-    lastX = ballInfo.x
-    lastY = ballInfo.y
-
     pointerId = ev.pointerId
     canvas.setPointerCapture(pointerId)
     canvas.addEventListener('pointermove', pointermove)
     canvas.addEventListener('pointerup', pointerup)
   }
 
-  const trackVelocity = () => {
-    if (isDiragging) {
-      lastX = ballInfo.x
-      lastY = ballInfo.y
-      requestAnimationFrame(trackVelocity)
-    }
-  }
   const animate = () => {
     ballInfo.vy += animateConfig.gravity
     ballInfo.vy *= animateConfig.friction
@@ -85,9 +70,42 @@ const ball = (canvas: HTMLCanvasElement, detail: BallInfo) => {
     ballInfo.y += ballInfo.vy
     ballInfo.x += ballInfo.vx
 
+    // 检查底部碰撞
     if (ballInfo.y + ballInfo.radius > canvas.height) {
       ballInfo.y = canvas.height - ballInfo.radius
+
+      ballInfo.vy *= -animateConfig.bounce
+
+      if (Math.abs(ballInfo.vy) < animateConfig.gravity) {
+        ballInfo.vy = 0
+      }
     }
+    //顶部
+    if (ballInfo.y - ballInfo.radius <= 1) {
+      ballInfo.y = ballInfo.radius
+      ballInfo.vy *= -animateConfig.bounce
+    }
+    // 右边
+    if (ballInfo.x + ballInfo.radius >= canvas.width - 1) {
+      ballInfo.x = canvas.width - ballInfo.radius
+      ballInfo.vx *= -animateConfig.bounce
+    }
+    // 左边
+    if (ballInfo.x - ballInfo.radius <= 1) {
+      ballInfo.x = ballInfo.radius
+      ballInfo.vx *= -animateConfig.bounce
+    }
+
+    draw()
+
+    if (
+      Math.abs(ballInfo.vx) < 0.1 &&
+      Math.abs(ballInfo.vy) < 0.1 &&
+      ballInfo.y > canvas.height - ballInfo.radius - 1
+    ) {
+      return
+    }
+    rafId = requestAnimationFrame(animate)
   }
 
   const draw = () => {
@@ -104,7 +122,7 @@ const ball = (canvas: HTMLCanvasElement, detail: BallInfo) => {
   canvas.addEventListener('pointerdown', pointerdown)
 
   const run = () => {
-    draw()
+    animate()
   }
 
   return {

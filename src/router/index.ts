@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import { customerRoutes } from './routes/customer'
 import { webapiRoutes } from './routes/webapi'
-import { virtualRoutes } from './routes/vritual'
+import { virtualRoutes } from './routes/virtual'
 import { canvasRoutes } from './routes/canvas'
 
 export const routes = [
@@ -13,7 +12,7 @@ export const routes = [
       title: '首页',
       scroll: true,
     },
-    component: HomeView,
+    component: () => import('../views/HomeView.vue'),
   },
   {
     path: '/about',
