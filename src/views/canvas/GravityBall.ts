@@ -43,6 +43,8 @@ const ball = (canvas: HTMLCanvasElement, detail: BallInfo) => {
     canvas.removeEventListener('pointermove', pointermove)
     canvas.removeEventListener('pointerup', pointerup)
 
+    if (rafId) cancelAnimationFrame(rafId)
+
     animate()
   }
 

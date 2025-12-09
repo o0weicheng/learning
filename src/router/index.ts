@@ -3,6 +3,7 @@ import { customerRoutes } from './routes/customer'
 import { webapiRoutes } from './routes/webapi'
 import { virtualRoutes } from './routes/virtual'
 import { canvasRoutes } from './routes/canvas'
+import { componentsRoutes } from './routes/components'
 
 export const routes = [
   {
@@ -29,6 +30,7 @@ export const routes = [
   ...webapiRoutes,
   ...virtualRoutes,
   ...canvasRoutes,
+  ...componentsRoutes,
 ] satisfies RouteRecordRaw[]
 
 const router = createRouter({

@@ -16,7 +16,6 @@ const count = computed(() => Math.ceil(height / virtualItemHeight.value))
 const virtualViewList = computed(() => {
   const start = Math.floor(scrollTop.value / virtualItemHeight.value)
 
-
   const listStart = Math.max(0, start - buffer)
   const listEnd = Math.min(list.length, listStart + buffer + count.value)
 
