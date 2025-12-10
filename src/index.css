@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+  --color-input: hsl(var(--input));
+}
+
+:root {
+  --input: 215 6.8% 12.6%;
+}
