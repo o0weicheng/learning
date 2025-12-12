@@ -1,9 +1,23 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-input: hsl(var(--input));
+  --grid-template-columns-layout: [full-start left-sidebar-start]
+    minmax(var(--layout-sidebar-min), 1fr) [left-sidebar-end] var(--layout-sidebar-gap) [body-start]
+    minmax(0, var(--layout-body-max)) [body-end] var(--layout-sidebar-gap) [right-sidebar-start]
+    minmax(var(--layout-sidebar-min), 1fr) [full-end right-sidebar-end];
+
+  --color-primary: hsl(205 60.2% 37.6%);
+  --color-danger: hsl(200, 70%, 50%);
 }
 
 :root {
-  --input: 215 6.8% 12.6%;
+  --navigation-height: 3.125rem;
+  --input: 205 60.2% 37.6%;
+  --layout-sidebar-min: 14rem;
+  --layout-sidebar-gap: 2rem;
+  --layout-body-max: 48rem;
+
+  --layout-side-padding-min: 1rem;
+  --layout-side-padding: max(var(--layout-side-padding-min), calc(50vw - 720px + 1rem));
 }
