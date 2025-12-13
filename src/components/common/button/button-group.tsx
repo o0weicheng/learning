@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 import React from 'react'
 import type { ButtonGroupProps } from '.'
 
-export const ButtonGroup = ({ children, className, onClick }: ButtonGroupProps) => {
+export const ButtonGroup = ({ children, className, onClick, size, type }: ButtonGroupProps) => {
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>, index: number) => {
     if (onClick) onClick(event, index)
   }
@@ -14,6 +14,8 @@ export const ButtonGroup = ({ children, className, onClick }: ButtonGroupProps) 
 
         const element = child as React.ReactElement<{
           className: string
+          size: ButtonGroupProps['size']
+          type: ButtonGroupProps['type']
           onClick: ButtonGroupProps['onClick']
         }>
 
@@ -23,6 +25,8 @@ export const ButtonGroup = ({ children, className, onClick }: ButtonGroupProps) 
             'rounded-none last:rounded-r-md first:rounded-l-md mx-[0.5px]',
             'focus:z-10',
           ),
+          size,
+          type,
           onClick: (e) => handleClick(e, index),
         })
       })}

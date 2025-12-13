@@ -1,1 +1,2 @@
-export type ComponentType = 'primary' | 'danger' | 'warning' | 'error' | 'default'
+export type ComponentType = 'danger' | 'warning' | 'ghost'
+export type ComponentSize = 'small' | 'large'

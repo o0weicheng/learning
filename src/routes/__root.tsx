@@ -1,4 +1,4 @@
-import { Header, Layout } from '@/layouts'
+import { Layout } from '@/layout'
 import { NotFound } from '@/pages/NotFound'
 import { createRootRoute, Outlet, useRouter, type AnyRoute } from '@tanstack/react-router'
 
@@ -11,7 +11,6 @@ const RootLayout = () => {
 
   return (
     <>
-      <Header />
       <Layout menus={menus}>
         <Outlet />
       </Layout>

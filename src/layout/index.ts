@@ -23,5 +23,3 @@ export type MenuProps = {
 }
 
 export { Layout } from './layout'
-export { Header } from './header'
-export { Banner } from './components/banner'

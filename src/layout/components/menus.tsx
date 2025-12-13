@@ -39,7 +39,7 @@ const MenuItem = ({ menu, location }: { menu: AnyRoute; location: ParsedLocation
     )
   }
 
-  const activeClassName = active ? 'bg-input/10  border-input/80' : ''
+  const activeClassName = active ? 'bg-basic/10  border-basic/80' : ''
 
   return (
     <MenuLiComponent
