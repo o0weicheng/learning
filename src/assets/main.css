@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+:root {
+  --navigation-height: 3.125rem;
+}
+
+@theme {
+  --spacing-navigation: var(--navigation-height);
+  --spacing-view-scroll: calc(100vh - var(--navigation-height));
+
+  --grid-template-columns-layout: [full-start left-sidebar-start] 14rem [left-sidebar-end] 2rem
+    [body-start] 1fr [body-end] 2rem [right-sidebar-start] 14rem [full-end right-sidebar-end];
+
+  --color-basic: hsl(205 60.2% 37.6%);
+  --color-danger: hsl(0, 80.2%, 37.2%);
+  --color-warning: hsl(38, 82.7%, 60.6%);
+}
+
+@layer {
+  button {
+    @apply cursor-pointer;
+  }
+  h2 {
+    @apply font-bold text-3xl mt-4 h-12 leading-12;
+  }
+}
