@@ -14,6 +14,9 @@ export class BasicChart {
   protected width: number
   protected height: number
   protected padding = 30
+  protected progress: number = 0
+  protected animId: number | null = null
+  protected readonly duration: number = 1000
 
   protected colors = ['#5B8FF9', '#5AD8A6', '#5D7092', '#F6BD16', '#E8684A']
 
@@ -28,6 +31,28 @@ export class BasicChart {
     this.innerWidth = width - this.padding * 2
     this.innerHeight = height - this.padding * 2
     this.data = options.data
+  }
+
+  // 动画
+  protected animate(draw: () => void) {
+    const startTimer = performance.now()
+
+    const loop = (now: number) => {
+      const elapsed = now - startTimer
+      let p = elapsed / this.duration
+
+      if (p >= 1) {
+        p = 1
+        this.progress = 1
+        draw()
+        return
+      }
+
+      this.progress = 1 - Math.pow(1 - p, 3)
+      draw()
+      this.animId = requestAnimationFrame(loop)
+    }
+    this.animId = requestAnimationFrame(loop)
   }
 }
 

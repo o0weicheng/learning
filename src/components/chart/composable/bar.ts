@@ -8,6 +8,8 @@ export class Bar extends AxisChart {
 
   constructor(ctx: CanvasRenderingContext2D, options: LChartCallFnOptions) {
     super(ctx, options)
+
+    this.animate(() => this.draw())
   }
 
   public draw() {
@@ -69,16 +71,17 @@ export class Bar extends AxisChart {
         if (index >= options.labels.length) return
 
         const barHeight = (value / max) * this.innerHeight
+        const currentBarHeight = barHeight * this.progress
 
         const x = this.padding + index * stepX + datasetIndex * barWidth + gap
-        const y = this.height - this.padding - barHeight
+        const y = this.height - this.padding - currentBarHeight
 
         // 记录区域
         this.#hitAreas.push({
           x,
           y,
           w: barWidth,
-          h: barHeight,
+          h: currentBarHeight,
           value: `${options['dataset'][datasetIndex]?.label}: ${value}`,
           label: options.labels[index] ?? value.toString(),
           datasetIndex,
@@ -93,11 +96,11 @@ export class Bar extends AxisChart {
         ctx.fillStyle = color!
         if (isHovered) {
           ctx.save()
-          ctx.filter = 'brightness(0.9)'
+          ctx.filter = 'brightness(0.8)'
         }
 
         ctx.beginPath()
-        ctx.rect(x, y, barWidth, barHeight)
+        ctx.rect(x, y, barWidth, currentBarHeight)
         ctx.fill()
 
         if (isHovered) ctx.restore()
@@ -113,9 +116,16 @@ export class Bar extends AxisChart {
     const { ctx } = this
     const { x, y, w, value, label } = this.#hoverData
 
+    // // 先画标题
+    // ctx.save()
+    // ctx.font = 'bold 14px sans-serif'
+
+    // ctx.fillText(label, tipX + padding, tipY + tipHeight / 2)
+    // ctx.restore()
+
     ctx.save()
-    const text = `${label}: ${value}`
-    ctx.font = '14px sans-serif'
+    const text = value
+    ctx.font = '12px sans-serif'
     const textWidth = ctx.measureText(text).width
     const padding = 6
 
