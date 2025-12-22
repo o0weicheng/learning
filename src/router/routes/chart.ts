@@ -14,6 +14,13 @@ export const chartRouter = [
         },
         component: () => import('@/views/chart/ChartBar.vue'),
       },
+      {
+        path: 'pie',
+        meta: {
+          title: '饼图',
+        },
+        component: () => import('@/views/chart/ChartPie.vue'),
+      },
     ],
   },
 ] satisfies RouteRecordRaw[]

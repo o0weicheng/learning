@@ -7,9 +7,7 @@ interface BarVisualState {
   value: number
 }
 
-export class Bar<
-  D extends readonly LChartDataset[] = readonly LChartDataset[],
-> extends AxisChart<D> {
+export class Bar<D extends readonly LChartDataset[]> extends AxisChart<D> {
   #hitAreas: BarHitArea[] = []
   #hoverData: BarHitArea | null = null
 

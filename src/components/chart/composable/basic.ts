@@ -22,7 +22,7 @@ export interface TooltipTargetInfo {
 // 公共父类
 // 初始化基础数据
 // 所有 Chart 基于 BasicChart
-export abstract class BasicChart<D extends readonly LChartDataset[] = readonly LChartDataset[]> {
+export abstract class BasicChart<D extends readonly LChartDataset[]> {
   ctx: CanvasRenderingContext2D
   options: LChartOptions
   data: Reactive<Map<Index<D>, LChartDataset['data']>>

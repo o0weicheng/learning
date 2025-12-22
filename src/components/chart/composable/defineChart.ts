@@ -9,9 +9,11 @@ import type {
   Index,
 } from '..'
 import { Bar } from './bar'
+import { Pie } from './pie'
 
 const drawMap: LChartCallDrawMap<LChartType> = {
   bar: Bar,
+  pie: Pie,
 }
 
 export const defineChart = <L extends readonly string[], D extends readonly LChartDataset[]>(
