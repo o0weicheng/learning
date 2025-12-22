@@ -1,15 +1,25 @@
 import type { BarHitArea } from '.'
-import type { LChartCallFnOptions } from '..'
+import type { LChartCallFnOptions, LChartDataset } from '..'
 import { AxisChart } from './basic'
 
-export class Bar extends AxisChart {
+interface BarVisualState {
+  height: number
+  value: number
+}
+
+export class Bar<
+  D extends readonly LChartDataset[] = readonly LChartDataset[],
+> extends AxisChart<D> {
   #hitAreas: BarHitArea[] = []
   #hoverData: BarHitArea | null = null
 
-  constructor(ctx: CanvasRenderingContext2D, options: LChartCallFnOptions) {
+  #prevData: Map<string, BarVisualState> = new Map()
+  #nextData: Map<string, BarVisualState> = new Map()
+
+  constructor(ctx: CanvasRenderingContext2D, options: LChartCallFnOptions<D>) {
     super(ctx, options)
 
-    this.animate(() => this.draw())
+    this.transition()
   }
 
   public draw() {
@@ -19,7 +29,7 @@ export class Bar extends AxisChart {
     this.drawYAxis()
     this.drawBars()
 
-    this.drawTooltip()
+    super.drawToolTip()
   }
 
   public handlePointerMove(x: number, y: number) {
@@ -28,25 +38,25 @@ export class Bar extends AxisChart {
         (area) => x >= area.x && x <= area.x + area.w && y >= area.y && y <= area.y + area.h,
       ) || null
 
-    const prevIndex = this.#hoverData
-      ? `${this.#hoverData.datasetIndex}-${this.#hoverData.index}`
-      : null
-    const nextIndex = found ? `${found.datasetIndex}-${found.index}` : null
-
-    if (prevIndex !== nextIndex) {
-      this.#hoverData = found
-      this.draw()
-
-      this.ctx.canvas.style.cursor = found ? 'pointer' : 'default'
+    if (found) {
+      this.setTootip({
+        x: found.x,
+        y: found.y,
+        w: found.w,
+        h: found.h,
+        title: found.label,
+        value: found.value,
+      })
+    } else {
+      this.setTootip(null)
     }
   }
 
   private drawBars() {
+    this.#nextData.clear()
+
     const { ctx, options } = this
-
     const { max } = this.getStepAndMax()
-
-    if (max <= 0) return
 
     // 每份占据主轴份额
     const stepX = this.innerWidth / options.labels.length
@@ -56,32 +66,38 @@ export class Bar extends AxisChart {
 
     let datasetIndex = 0
     const dataSize = this.data.size
-
     // 设置间隙
     const barWidth = (stepX * 0.8) / dataSize
     const gap = stepX * 0.1
 
     for (const [_, dataArray] of this.data) {
       const color = this.colors[datasetIndex % this.colors.length]
-
       ctx.save()
       ctx.fillStyle = color!
 
       dataArray.forEach((value, index) => {
         if (index >= options.labels.length) return
 
-        const barHeight = (value / max) * this.innerHeight
-        const currentBarHeight = barHeight * this.progress
+        const key = `${datasetIndex}-${index}`
+        const startData = this.#prevData.get(key) ?? { height: 0, value: 0 }
+        const targetHeight = max > 0 ? (value / max) * this.innerHeight : 0
+        const currentHeight = startData.height + (targetHeight - startData.height) * this.progress
+        const currentValue = startData.value + (value - startData.value) * this.progress
+
+        this.#nextData.set(key, {
+          height: currentHeight,
+          value: currentValue,
+        })
 
         const x = this.padding + index * stepX + datasetIndex * barWidth + gap
-        const y = this.height - this.padding - currentBarHeight
+        const y = this.height - this.padding - currentHeight
 
         // 记录区域
         this.#hitAreas.push({
           x,
           y,
           w: barWidth,
-          h: currentBarHeight,
+          h: currentHeight,
           value: `${options['dataset'][datasetIndex]?.label}: ${value}`,
           label: options.labels[index] ?? value.toString(),
           datasetIndex,
@@ -100,7 +116,7 @@ export class Bar extends AxisChart {
         }
 
         ctx.beginPath()
-        ctx.rect(x, y, barWidth, currentBarHeight)
+        ctx.rect(x, y, barWidth, currentHeight)
         ctx.fill()
 
         if (isHovered) ctx.restore()
@@ -110,43 +126,8 @@ export class Bar extends AxisChart {
     }
   }
 
-  private drawTooltip() {
-    if (!this.#hoverData) return
-
-    const { ctx } = this
-    const { x, y, w, value, label } = this.#hoverData
-
-    // // 先画标题
-    // ctx.save()
-    // ctx.font = 'bold 14px sans-serif'
-
-    // ctx.fillText(label, tipX + padding, tipY + tipHeight / 2)
-    // ctx.restore()
-
-    ctx.save()
-    const text = value
-    ctx.font = '12px sans-serif'
-    const textWidth = ctx.measureText(text).width
-    const padding = 6
-
-    const tipWidth = textWidth + padding * 2
-    const tipHeight = 24
-    // 计算位置
-    let tipX = x + w / 2 - tipWidth / 2
-    let tipY = y - tipHeight - 5
-
-    if (tipX < 0) tipX = 0
-    if (tipX + tipWidth > this.width) tipX = this.width - tipWidth
-    if (tipY < 0) tipY = y + 5
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
-    ctx.fillRect(tipX, tipY, tipWidth, tipHeight)
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.88)'
-    ctx.textBaseline = 'middle'
-    ctx.textAlign = 'left'
-    ctx.fillText(text, tipX + padding, tipY + tipHeight / 2)
-
-    ctx.restore()
+  // 在 update 触发动画重置前，把当前画面上的值存为“旧值”
+  protected captureState() {
+    this.#prevData = new Map(this.#nextData)
   }
 }

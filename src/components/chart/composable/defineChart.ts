@@ -6,6 +6,7 @@ import type {
   LChartOptionsWithLabels,
   LChartOptions,
   LChartCallDrawMap,
+  Index,
 } from '..'
 import { Bar } from './bar'
 
@@ -13,18 +14,18 @@ const drawMap: LChartCallDrawMap<LChartType> = {
   bar: Bar,
 }
 
-export const defineChart = <L extends readonly string[]>(
+export const defineChart = <L extends readonly string[], D extends readonly LChartDataset[]>(
   type: LChartType,
-  options: LChartOptionsWithLabels<L>,
-): LChartCallOptions => {
+  options: LChartOptionsWithLabels<L> & { dataset: D },
+): LChartCallOptions<D> => {
   const _options = options as unknown as LChartOptions
-  const _mapData = reactive(new Map())
+  const _mapData = reactive(new Map<Index<D>, LChartDataset['data']>())
 
   options.dataset.forEach((data, index) => {
-    _mapData.set(index, data.data)
+    _mapData.set(index.toString() as Index<D>, data.data)
   })
 
-  const update = (index: number, newData: LChartDataset['data']) => {
+  const update = (index: Index<D>, newData: LChartDataset['data']) => {
     _mapData.set(index, newData)
   }
 

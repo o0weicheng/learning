@@ -1,13 +1,13 @@
-<script setup lang="ts">
-import { onMounted, onUnmounted, useTemplateRef } from 'vue'
-import type { LChartCallOptions, LChartDrawer } from '.'
+<script setup lang="ts" generic="D extends readonly LChartDataset[]">
+import { onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
+import type { LChartCallOptions, LChartDataset, LChartDrawer } from '.'
 
 defineOptions({
   name: 'LChart',
 })
 
 const { option, width, height } = defineProps<{
-  option: LChartCallOptions
+  option: LChartCallOptions<D>
   width: number
   height: number
 }>()
@@ -51,6 +51,16 @@ const chartPointermove = (e: PointerEvent) => {
 
   instance?.handlePointerMove(x, y)
 }
+
+watch(
+  () => option.data,
+  () => {
+    instance?.transition()
+  },
+  {
+    deep: true,
+  },
+)
 
 onMounted(() => {
   initCanvas()

@@ -7,7 +7,7 @@ export type LChartType = 'bar' | 'line' | 'dubble' | 'doughnut' | 'pie'
 export interface LChartDataset {
   label: string
   data: number[]
-  color: string[]
+  color?: string[]
 }
 
 // 实现 LChartDataset['data'] 和 LChartOptions['labels'] 长度一致
@@ -18,8 +18,8 @@ export interface LChartDatasetWithLen<Len extends number> extends Omit<LChartDat
 
 // defineChart 接收的参数
 export interface LChartOptions {
-  labels: string[]
-  dataset: LChartDataset[]
+  labels: readonly string[]
+  dataset: readonly LChartDataset[]
 }
 
 // 实现 LChartDataset['data'] 和 LChartOptions['labels'] 长度一致
@@ -29,23 +29,26 @@ export interface LChartOptionsWithLabels<Labels extends readonly string[]> {
   dataset: LChartDatasetWithLen<Labels['length']>[]
 }
 
-export interface LChartCallFnOptions {
+export interface LChartCallFnOptions<
+  D extends readonly LChartDataset[] = readonly LChartDataset[],
+> {
   width: number
   height: number
-  data: Reactive<Map<number, LChartDataset['data']>>
+  data: Reactive<Map<Index<D>, LChartDataset['data']>>
   options: LChartOptions
 }
 
 // defineChart 放回的方法格式
 export interface LChartDrawer {
   draw(): void
+  transition(): void
   handlePointerMove(x: number, y: number): void
 }
 
 // defineChart 放回的方法格式
-export type LChartDrawerCtor = new (
+export type LChartDrawerCtor = new <D extends readonly LChartDataset[]>(
   ctx: CanvasRenderingContext2D,
-  options: LChartCallFnOptions,
+  options: LChartCallFnOptions<D>,
 ) => LChartDrawer
 
 // defineChart 返回的方法映射表
@@ -55,12 +58,16 @@ export type LChartCallDrawMap<T extends LChartType> = {
 
 // defineChart 返回的内容
 // 可通过 update 修改数据
-export interface LChartCallOptions {
-  data: Reactive<Map<number, LChartDataset['data']>>
+export interface LChartCallOptions<D extends readonly LChartDataset[] = readonly LChartDataset[]> {
+  data: Reactive<Map<Index<D>, LChartDataset['data']>>
   options: LChartOptions
-  update: (index: number, newData: LChartDataset['data']) => void
+  update: (index: Index<D>, newData: LChartDataset['data']) => void
   _fn: LChartCallDrawMap<LChartType>[LChartType]
 }
+
+export type DatasetIndex<T extends readonly unknown[]> = Exclude<keyof T, keyof unknown[]>
+
+export type Index<D extends readonly LChartDataset[]> = DatasetIndex<D>
 
 export { default as LChart } from './chart.vue'
 export { defineChart } from './composable/defineChart'
