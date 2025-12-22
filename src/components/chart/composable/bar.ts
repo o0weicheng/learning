@@ -38,6 +38,7 @@ export class Bar<
         (area) => x >= area.x && x <= area.x + area.w && y >= area.y && y <= area.y + area.h,
       ) || null
 
+    this.#hoverData = found
     if (found) {
       this.setTootip({
         x: found.x,
@@ -49,6 +50,9 @@ export class Bar<
       })
     } else {
       this.setTootip(null)
+    }
+    if (this.progress >= 1) {
+      this.draw()
     }
   }
 
@@ -104,22 +108,20 @@ export class Bar<
           index,
         })
 
+        ctx.fillStyle = color!
+        ctx.beginPath()
+        ctx.rect(x, y, barWidth, currentHeight)
+        ctx.fill()
+
         const isHovered =
           this.#hoverData &&
           this.#hoverData.index === index &&
           this.#hoverData.datasetIndex === datasetIndex
 
-        ctx.fillStyle = color!
         if (isHovered) {
-          ctx.save()
-          ctx.filter = 'brightness(0.8)'
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.12)'
+          ctx.fill()
         }
-
-        ctx.beginPath()
-        ctx.rect(x, y, barWidth, currentHeight)
-        ctx.fill()
-
-        if (isHovered) ctx.restore()
       })
       ctx.restore()
       datasetIndex++
